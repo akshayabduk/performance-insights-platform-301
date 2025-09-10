@@ -123,6 +123,20 @@ export MONGODB_URL="mongodb://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/?au
 export MONGODB_DB="${DB_NAME}"
 EOF
 
+# Initialize MongoDB schema (collections, validators, indexes)
+if [ -f "schema/init_schema.js" ]; then
+    echo "Initializing MongoDB schema (validators, indexes)..."
+    mongosh --port ${DB_PORT} --quiet --eval "const DB_NAME='${DB_NAME}';" schema/init_schema.js
+    SCHEMA_EXIT=$?
+    if [ $SCHEMA_EXIT -eq 0 ]; then
+        echo "✓ Schema initialization complete"
+    else
+        echo "✗ Schema initialization failed (exit code $SCHEMA_EXIT)"
+    fi
+else
+    echo "Schema script not found at schema/init_schema.js; skipping schema initialization"
+fi
+
 echo "MongoDB setup complete!"
 echo "Database: ${DB_NAME}"
 echo "Admin user: ${DB_USER} (password: ${DB_PASSWORD})"
